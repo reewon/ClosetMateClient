@@ -6,18 +6,18 @@ import 'closet_item.dart';
 class FavoriteOutfit {
   final int id;
   final String name;
-  final ClosetItem? 상의;
-  final ClosetItem? 하의;
-  final ClosetItem? 신발;
-  final ClosetItem? 아우터;
+  final ClosetItem? top;
+  final ClosetItem? bottom;
+  final ClosetItem? shoes;
+  final ClosetItem? outer;
 
   FavoriteOutfit({
     required this.id,
     required this.name,
-    this.상의,
-    this.하의,
-    this.신발,
-    this.아우터,
+    this.top,
+    this.bottom,
+    this.shoes,
+    this.outer,
   });
 
   /// JSON에서 FavoriteOutfit 객체 생성 (목록 조회용 - id와 name만)
@@ -33,16 +33,16 @@ class FavoriteOutfit {
     return FavoriteOutfit(
       id: json['id'] as int? ?? 0, // 상세 조회에는 id가 없을 수 있음
       name: json['name'] as String,
-      상의: json['상의'] != null
+      top: json['상의'] != null
           ? ClosetItem.fromJson(json['상의'] as Map<String, dynamic>)
           : null,
-      하의: json['하의'] != null
+      bottom: json['하의'] != null
           ? ClosetItem.fromJson(json['하의'] as Map<String, dynamic>)
           : null,
-      신발: json['신발'] != null
+      shoes: json['신발'] != null
           ? ClosetItem.fromJson(json['신발'] as Map<String, dynamic>)
           : null,
-      아우터: json['아우터'] != null
+      outer: json['아우터'] != null
           ? ClosetItem.fromJson(json['아우터'] as Map<String, dynamic>)
           : null,
     );
@@ -53,10 +53,10 @@ class FavoriteOutfit {
     return {
       'id': id,
       'name': name,
-      '상의': 상의?.toJson(),
-      '하의': 하의?.toJson(),
-      '신발': 신발?.toJson(),
-      '아우터': 아우터?.toJson(),
+      '상의': top?.toJson(),
+      '하의': bottom?.toJson(),
+      '신발': shoes?.toJson(),
+      '아우터': outer?.toJson(),
     };
   }
 

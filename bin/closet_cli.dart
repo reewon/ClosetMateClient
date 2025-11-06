@@ -1,4 +1,5 @@
 import '../lib/cli/menu.dart';
+import '../lib/cli/prompt.dart';
 import '../lib/utils/logger.dart';
 import '../lib/utils/config.dart';
 
