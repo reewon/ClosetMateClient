@@ -30,7 +30,7 @@ class Prompt {
   /// 반환: 선택한 카테고리 또는 'B' (뒤로가기), null (잘못된 입력)
   static String? selectCategory({bool allowBack = true}) {
     final backOption = allowBack ? '/B:뒤로가기' : '';
-    stdout.write('카테고리를 선택하세요 (상의/하의/신발/아우터$backOption): ');
+    stdout.write('카테고리를 선택하세요 (top/bottom/shoes/outer$backOption): ');
     final input = stdin.readLineSync()?.trim() ?? '';
 
     // 뒤로가기

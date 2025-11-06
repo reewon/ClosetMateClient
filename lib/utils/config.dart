@@ -7,7 +7,7 @@ class Config {
   static const String authToken = 'test-token';
 
   /// 유효한 카테고리 목록
-  static const List<String> validCategories = ['상의', '하의', '신발', '아우터'];
+  static const List<String> validCategories = ['top', 'bottom', 'shoes', 'outer'];
 
   /// 카테고리가 유효한지 확인
   static bool isValidCategory(String category) {

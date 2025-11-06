@@ -47,10 +47,10 @@ class Views {
   /// [outfit]: Outfit 객체
   static void displayTodayOutfit(Outfit outfit) {
     Logger.title('오늘의 코디 보기');
-    Logger.log('상의: ${_formatOutfitItem(outfit.top)}');
-    Logger.log('하의: ${_formatOutfitItem(outfit.bottom)}');
-    Logger.log('신발: ${_formatOutfitItem(outfit.shoes)}');
-    Logger.log('아우터: ${_formatOutfitItem(outfit.outer)}');
+    Logger.log('top: ${_formatOutfitItem(outfit.top)}');
+    Logger.log('bottom: ${_formatOutfitItem(outfit.bottom)}');
+    Logger.log('shoes: ${_formatOutfitItem(outfit.shoes)}');
+    Logger.log('outer: ${_formatOutfitItem(outfit.outer)}');
   }
 
   /// 오늘의 코디 옵션 메뉴 표시
@@ -103,10 +103,10 @@ class Views {
   static void displayFavoriteDetail(FavoriteOutfit favorite) {
     Logger.blankLine();
     Logger.log('[${favorite.name}]');
-    Logger.log('- 상의: ${_formatOutfitItem(favorite.top)}');
-    Logger.log('- 하의: ${_formatOutfitItem(favorite.bottom)}');
-    Logger.log('- 신발: ${_formatOutfitItem(favorite.shoes)}');
-    Logger.log('- 아우터: ${_formatOutfitItem(favorite.outer)}');
+    Logger.log('- top: ${_formatOutfitItem(favorite.top)}');
+    Logger.log('- bottom: ${_formatOutfitItem(favorite.bottom)}');
+    Logger.log('- shoes: ${_formatOutfitItem(favorite.shoes)}');
+    Logger.log('- outer: ${_formatOutfitItem(favorite.outer)}');
   }
 
   /// 즐겨찾는 코디 옵션 메뉴 표시

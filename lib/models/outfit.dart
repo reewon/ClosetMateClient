@@ -20,17 +20,17 @@ class Outfit {
   /// JSON에서 Outfit 객체 생성
   factory Outfit.fromJson(Map<String, dynamic> json) {
     return Outfit(
-      top: json['상의'] != null
-          ? ClosetItem.fromJson(json['상의'] as Map<String, dynamic>)
+      top: json['top'] != null
+          ? ClosetItem.fromJson(json['top'] as Map<String, dynamic>)
           : null,
-      bottom: json['하의'] != null
-          ? ClosetItem.fromJson(json['하의'] as Map<String, dynamic>)
+      bottom: json['bottom'] != null
+          ? ClosetItem.fromJson(json['bottom'] as Map<String, dynamic>)
           : null,
-      shoes: json['신발'] != null
-          ? ClosetItem.fromJson(json['신발'] as Map<String, dynamic>)
+      shoes: json['shoes'] != null
+          ? ClosetItem.fromJson(json['shoes'] as Map<String, dynamic>)
           : null,
-      outer: json['아우터'] != null
-          ? ClosetItem.fromJson(json['아우터'] as Map<String, dynamic>)
+      outer: json['outer'] != null
+          ? ClosetItem.fromJson(json['outer'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -38,10 +38,10 @@ class Outfit {
   /// Outfit 객체를 JSON으로 변환
   Map<String, dynamic> toJson() {
     return {
-      '상의': top?.toJson(),
-      '하의': bottom?.toJson(),
-      '신발': shoes?.toJson(),
-      '아우터': outer?.toJson(),
+      'top': top?.toJson(),
+      'bottom': bottom?.toJson(),
+      'shoes': shoes?.toJson(),
+      'outer': outer?.toJson(),
     };
   }
 
@@ -53,13 +53,13 @@ class Outfit {
   /// 특정 카테고리의 아이템 반환
   ClosetItem? getItemByCategory(String category) {
     switch (category) {
-      case '상의':
+      case 'top':
         return top;
-      case '하의':
+      case 'bottom':
         return bottom;
-      case '신발':
+      case 'shoes':
         return shoes;
-      case '아우터':
+      case 'outer':
         return outer;
       default:
         return null;

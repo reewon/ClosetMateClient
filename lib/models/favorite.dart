@@ -33,17 +33,17 @@ class FavoriteOutfit {
     return FavoriteOutfit(
       id: json['id'] as int? ?? 0, // 상세 조회에는 id가 없을 수 있음
       name: json['name'] as String,
-      top: json['상의'] != null
-          ? ClosetItem.fromJson(json['상의'] as Map<String, dynamic>)
+      top: json['top'] != null
+          ? ClosetItem.fromJson(json['top'] as Map<String, dynamic>)
           : null,
-      bottom: json['하의'] != null
-          ? ClosetItem.fromJson(json['하의'] as Map<String, dynamic>)
+      bottom: json['bottom'] != null
+          ? ClosetItem.fromJson(json['bottom'] as Map<String, dynamic>)
           : null,
-      shoes: json['신발'] != null
-          ? ClosetItem.fromJson(json['신발'] as Map<String, dynamic>)
+      shoes: json['shoes'] != null
+          ? ClosetItem.fromJson(json['shoes'] as Map<String, dynamic>)
           : null,
-      outer: json['아우터'] != null
-          ? ClosetItem.fromJson(json['아우터'] as Map<String, dynamic>)
+      outer: json['outer'] != null
+          ? ClosetItem.fromJson(json['outer'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -53,10 +53,10 @@ class FavoriteOutfit {
     return {
       'id': id,
       'name': name,
-      '상의': top?.toJson(),
-      '하의': bottom?.toJson(),
-      '신발': shoes?.toJson(),
-      '아우터': outer?.toJson(),
+      'top': top?.toJson(),
+      'bottom': bottom?.toJson(),
+      'shoes': shoes?.toJson(),
+      'outer': outer?.toJson(),
     };
   }
 

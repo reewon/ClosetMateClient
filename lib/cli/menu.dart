@@ -61,12 +61,17 @@ class Menu {
       }
 
       // 카테고리 선택 완료 → 옷장 아이템 화면
-      await _closetItemsMenu(category);
+      final shouldReturnToMain = await _closetItemsMenu(category);
+      if (shouldReturnToMain) {
+        return; // 메인 메뉴로 돌아가기
+      }
     }
   }
 
   /// 옷장 아이템 화면 (특정 카테고리)
-  Future<void> _closetItemsMenu(String category) async {
+  /// 
+  /// 반환: true면 메인 메뉴로 돌아가기, false면 내 옷장 보기로 돌아가기
+  Future<bool> _closetItemsMenu(String category) async {
     while (true) {
       try {
         // 아이템 목록 조회
@@ -85,14 +90,16 @@ class Menu {
             await _addClosetItem(category);
             break;
           case 3: // 내 옷장 보기로 돌아가기
-            return;
+            return false;
           case 4: // 메뉴로 돌아가기
             Logger.blankLine();
             Logger.log('→ 메인 메뉴로 돌아갑니다...');
-            return;
+            return true;
         }
       } catch (e) {
         _handleError(e);
+        // 에러 발생 시 상위 메뉴로 돌아가기 (무한 루프 방지)
+        return false;
       }
     }
   }
@@ -183,6 +190,8 @@ class Menu {
         }
       } catch (e) {
         _handleError(e);
+        // 에러 발생 시 메인 메뉴로 돌아가기 (무한 루프 방지)
+        return;
       }
     }
   }
@@ -279,6 +288,8 @@ class Menu {
         await _favoriteDetailMenu(itemId);
       } catch (e) {
         _handleError(e);
+        // 에러 발생 시 메인 메뉴로 돌아가기 (무한 루프 방지)
+        return;
       }
     }
   }

@@ -31,7 +31,7 @@ class OutfitService {
 
   /// 코디 아이템 선택/변경
   /// 
-  /// [category]: 카테고리 (상의, 하의, 신발, 아우터)
+  /// [category]: 카테고리 (top, bottom, shoes, outer)
   /// [itemId]: 선택할 아이템 ID
   /// 반환: 성공 메시지
   /// 예외: ApiException (에러 발생 시)
@@ -56,7 +56,7 @@ class OutfitService {
 
   /// 특정 카테고리 비우기
   /// 
-  /// [category]: 비울 카테고리 (상의, 하의, 신발, 아우터)
+  /// [category]: 비울 카테고리 (top, bottom, shoes, outer)
   /// 반환: 성공 메시지
   /// 예외: ApiException (에러 발생 시)
   Future<String> clearCategory(String category) async {

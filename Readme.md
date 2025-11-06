@@ -42,18 +42,6 @@ dart pub get
 dart run bin/closet_cli.dart
 ```
 
-## 개발 상태
-
-- ✅ 1단계: 프로젝트 기반 구조 설정 (완료)
-- ⏳ 2단계: 데이터 모델 정의 (예정)
-- ⏳ 3단계: API 클라이언트 구현 (예정)
-- ⏳ 4단계: 서비스 계층 구현 (예정)
-- ⏳ 5단계: CLI 인터페이스 구현 (예정)
-- ⏳ 6단계: 진입점 및 통합 (예정)
-- ⏳ 7단계: 테스트 및 검증 (예정)
-
----
-
 ## 🔐 인증 정책
 
 - 모든 API는 `Authorization: test-token` 헤더가 필요합니다.
@@ -115,7 +103,7 @@ class ClosetItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    category = Column(String)   # 상의, 하의, 신발, 아우터
+    category = Column(String)   # top, bottom, shoes, outer
     name = Column(String)
     image_url = Column(String, nullable=True)
 ```
@@ -131,10 +119,10 @@ class TodayOutfit(Base):
     __tablename__ = "today_outfit"
 
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    상의_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    하의_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    신발_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    아우터_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    top_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    bottom_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    shoes_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    outer_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 ```
 
@@ -151,10 +139,10 @@ class FavoriteOutfit(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String)
-    상의_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    하의_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    신발_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    아우터_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    top_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    bottom_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    shoes_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    outer_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 ```
 
@@ -187,17 +175,17 @@ class FavoriteOutfit(Base):
 
 | Method | Endpoint | Description | Request | Response |
 |--------|----------|-------------|---------|----------|
-| `GET` | `/api/v1/outfit/today` | 오늘의 코디 보기 | — | `{ "상의": {"id": 1, "name": "화이트 티셔츠"}, "하의": {"id": 2, "name": "베이지 팬츠"}, ... }` |
-| `PUT` | `/api/v1/outfit/today` | 코디 아이템 선택/변경 | `{ "category": "상의", "item_id": 3 }` | `{ "message": "상의가 변경되었습니다." }` |
-| `PUT` | `/api/v1/outfit/clear` | 특정 카테고리 비우기 | `{ "category": "상의" }` | `{ "message": "상의가 비워졌습니다." }` |
-| `POST` | `/api/v1/outfit/recommend` | AI 추천 실행 | — | `{ "상의": {"id": ..., "name": "..."}, "하의": {"id": ..., "name": "..."}, ... }` |
+| `GET` | `/api/v1/outfit/today` | 오늘의 코디 보기 | — | `{ "top": {"id": 1, "name": "화이트 티셔츠"}, "bottom": {"id": 2, "name": "베이지 팬츠"}, ... }` |
+| `PUT` | `/api/v1/outfit/today` | 코디 아이템 선택/변경 | `{ "category": "top", "item_id": 3 }` | `{ "message": "top이 변경되었습니다." }` |
+| `PUT` | `/api/v1/outfit/clear` | 특정 카테고리 비우기 | `{ "category": "top" }` | `{ "message": "top이 비워졌습니다." }` |
+| `POST` | `/api/v1/outfit/recommend` | AI 추천 실행 | — | `{ "top": {"id": ..., "name": "..."}, "bottom": {"id": ..., "name": "..."}, ... }` |
 
 ### 4. Favorites (즐겨찾는 코디)
 
 | Method | Endpoint | Description | Request | Response |
 |--------|----------|-------------|---------|----------|
 | `GET` | `/api/v1/favorites` | 즐겨찾는 코디 목록 | — | `[{"id":1,"name":"주말 데일리룩"}]` |
-| `GET` | `/api/v1/favorites/{id}` | 특정 코디 보기 | — | `{ "name": "주말 데일리룩", "상의": {"id": ..., "name": "..."}, ...}` |
+| `GET` | `/api/v1/favorites/{id}` | 특정 코디 보기 | — | `{ "name": "주말 데일리룩", "top": {"id": ..., "name": "..."}, ...}` |
 | `POST` | `/api/v1/favorites` | 오늘의 코디 즐겨찾기 저장 | `{ "name": "주말 데일리룩" }` | `{ "message": "저장 완료" }` |
 | `PUT` | `/api/v1/favorites/{id}` | 코디 이름 변경 | `{ "new_name": "주말 카페룩" }` | `{ "message": "이름이 변경되었습니다." }` |
 | `DELETE` | `/api/v1/favorites/{id}` | 코디 삭제 | — | `{ "message": "삭제 완료" }` |
@@ -256,7 +244,7 @@ class FavoriteOutfit(Base):
   "status": "error",
   "code": 400,
   "error": "Bad Request",
-  "message": "잘못된 카테고리입니다. 가능한 값: 상의, 하의, 신발, 아우터",
+  "message": "잘못된 카테고리입니다. 가능한 값: top, bottom, shoes, outer",
   "detail": {
     "category": "잘못된카테고리"
   }
@@ -295,19 +283,19 @@ class FavoriteOutfit(Base):
 **정상 응답 - 완전한 코디 (200 OK)**
 ```json
 {
-  "상의": {
+  "top": {
     "id": 1,
     "name": "화이트 티셔츠"
   },
-  "하의": {
+  "bottom": {
     "id": 2,
     "name": "베이지 팬츠"
   },
-  "신발": {
+  "shoes": {
     "id": 3,
     "name": "화이트 운동화"
   },
-  "아우터": {
+  "outer": {
     "id": 4,
     "name": "블루 데님 재킷"
   }
@@ -317,23 +305,23 @@ class FavoriteOutfit(Base):
 **정상 응답 - 부분 코디 (200 OK)**
 ```json
 {
-  "상의": {
+  "top": {
     "id": 1,
     "name": "화이트 티셔츠"
   },
-  "하의": null,
-  "신발": null,
-  "아우터": null
+  "bottom": null,
+  "shoes": null,
+  "outer": null
 }
 ```
 
 **정상 응답 - 빈 코디 (200 OK)**
 ```json
 {
-  "상의": null,
-  "하의": null,
-  "신발": null,
-  "아우터": null
+  "top": null,
+  "bottom": null,
+  "shoes": null,
+  "outer": null
 }
 ```
 
@@ -342,7 +330,7 @@ class FavoriteOutfit(Base):
 **정상 응답 (200 OK)**
 ```json
 {
-  "message": "상의가 변경되었습니다."
+  "message": "top이 변경되었습니다."
 }
 ```
 
@@ -352,7 +340,7 @@ class FavoriteOutfit(Base):
   "status": "error",
   "code": 400,
   "error": "Bad Request",
-  "message": "잘못된 카테고리입니다. 가능한 값: 상의, 하의, 신발, 아우터",
+  "message": "잘못된 카테고리입니다. 가능한 값: top, bottom, shoes, outer",
   "detail": {
     "category": "잘못된카테고리"
   }
@@ -369,7 +357,7 @@ class FavoriteOutfit(Base):
   "detail": {
     "resource": "closet_item",
     "item_id": 999,
-    "category": "상의"
+    "category": "top"
   }
 }
 ```
@@ -379,7 +367,7 @@ class FavoriteOutfit(Base):
 **정상 응답 (200 OK)**
 ```json
 {
-  "message": "상의가 비워졌습니다."
+  "message": "top이 비워졌습니다."
 }
 ```
 
@@ -388,19 +376,19 @@ class FavoriteOutfit(Base):
 **정상 응답 - 완전한 추천 (200 OK)**
 ```json
 {
-  "상의": {
+  "top": {
     "id": 5,
     "name": "그레이 후드티"
   },
-  "하의": {
+  "bottom": {
     "id": 6,
     "name": "블랙 슬랙스"
   },
-  "신발": {
+  "shoes": {
     "id": 7,
     "name": "컨버스"
   },
-  "아우터": {
+  "outer": {
     "id": 8,
     "name": "블랙 패딩"
   }
@@ -411,19 +399,19 @@ class FavoriteOutfit(Base):
 *(이미 선택된 아이템이 있는 경우 해당 카테고리는 유지되고 나머지만 추천)*
 ```json
 {
-  "상의": {
+  "top": {
     "id": 1,
     "name": "화이트 티셔츠"
   },
-  "하의": {
+  "bottom": {
     "id": 6,
     "name": "블랙 슬랙스"
   },
-  "신발": {
+  "shoes": {
     "id": 7,
     "name": "컨버스"
   },
-  "아우터": null
+  "outer": null
 }
 ```
 
@@ -472,19 +460,19 @@ class FavoriteOutfit(Base):
 ```json
 {
   "name": "주말 데일리룩",
-  "상의": {
+  "top": {
     "id": 1,
     "name": "화이트 티셔츠"
   },
-  "하의": {
+  "bottom": {
     "id": 2,
     "name": "베이지 팬츠"
   },
-  "신발": {
+  "shoes": {
     "id": 3,
     "name": "화이트 운동화"
   },
-  "아우터": {
+  "outer": {
     "id": 4,
     "name": "블루 데님 재킷"
   }
@@ -520,13 +508,13 @@ class FavoriteOutfit(Base):
   "status": "error",
   "code": 400,
   "error": "Bad Request",
-  "message": "코디를 완성해주세요. (상의, 하의, 신발, 아우터가 모두 선택되어야 합니다)",
+  "message": "코디를 완성해주세요. (top, bottom, shoes, outer가 모두 선택되어야 합니다)",
   "detail": {
     "today_outfit": {
-      "상의_id": 1,
-      "하의_id": 2,
-      "신발_id": null,
-      "아우터_id": null
+      "top_id": 1,
+      "bottom_id": 2,
+      "shoes_id": null,
+      "outer_id": null
     }
   }
 }

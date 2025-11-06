@@ -113,11 +113,31 @@ class ApiClient {
       return jsonResponse;
     }
 
-    // 에러 응답 - ApiError 모델로 파싱
-    if (jsonResponse is Map<String, dynamic> &&
+    // 에러 응답 처리
+    Map<String, dynamic>? errorData;
+    
+    // FastAPI의 detail 키로 감싸진 에러 응답 처리
+    if (jsonResponse is Map<String, dynamic> && 
+        jsonResponse.containsKey('detail')) {
+      final detail = jsonResponse['detail'];
+      if (detail is Map<String, dynamic> &&
+          detail.containsKey('status') &&
+          detail['status'] == 'error') {
+        errorData = detail as Map<String, dynamic>;
+      }
+    }
+    
+    // 직접 에러 응답 형식
+    if (errorData == null &&
+        jsonResponse is Map<String, dynamic> &&
         jsonResponse.containsKey('status') &&
         jsonResponse['status'] == 'error') {
-      final apiError = ApiError.fromJson(jsonResponse);
+      errorData = jsonResponse;
+    }
+
+    // ApiError 모델로 파싱하여 예외 발생
+    if (errorData != null) {
+      final apiError = ApiError.fromJson(errorData);
       throw ApiException(apiError.message, apiError: apiError);
     }
 

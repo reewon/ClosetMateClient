@@ -12,7 +12,7 @@ class ClosetService {
 
   /// 카테고리별 아이템 조회
   /// 
-  /// [category]: 카테고리 (상의, 하의, 신발, 아우터)
+  /// [category]: 카테고리 (top, bottom, shoes, outer)
   /// 반환: ClosetItem 리스트
   /// 예외: ApiException (에러 발생 시)
   Future<List<ClosetItem>> getItemsByCategory(String category) async {
@@ -40,7 +40,7 @@ class ClosetService {
 
   /// 아이템 추가
   /// 
-  /// [category]: 카테고리 (상의, 하의, 신발, 아우터)
+  /// [category]: 카테고리 (top, bottom, shoes, outer)
   /// [name]: 아이템 이름
   /// 반환: 성공 메시지
   /// 예외: ApiException (에러 발생 시)
