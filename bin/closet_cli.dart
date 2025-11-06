@@ -21,12 +21,7 @@ void main() async {
 /// 초기화
 void _initialize() {
   Logger.blankLine();
-  Logger.log('═══════════════════════════════════════');
-  Logger.log('    ClosetMate');
-  Logger.log('═══════════════════════════════════════');
-  Logger.blankLine();
-  Logger.info('서버 연결: ${Config.baseUrl}');
-  Logger.info('인증 모드: 테스트 토큰');
+  Logger.log('< ClosetMate >');
   Logger.blankLine();
 }
 
