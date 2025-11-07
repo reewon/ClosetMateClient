@@ -247,10 +247,19 @@ class Menu {
 
   /// 오늘의 코디 - 즐겨찾기로 저장
   Future<void> _saveFavorite() async {
-    final name = Prompt.inputText('코디 이름을 입력하세요');
-    if (name == null) return; // 뒤로가기 또는 빈 입력
-
     try {
+      // 코디 완성 여부 확인
+      final outfit = await _outfitService.getTodayOutfit();
+      if (!outfit.isComplete) {
+        Logger.warning('코디를 완성해주세요!');
+        Logger.log('(top, bottom, shoes, outer가 모두 선택되어야 합니다)');
+        return;
+      }
+
+      // 코디가 완성되었으면 이름 입력 받기
+      final name = Prompt.inputText('코디 이름을 입력하세요');
+      if (name == null) return; // 뒤로가기 또는 빈 입력
+
       await _favoritesService.saveFavorite(name);
       Logger.success('"$name" 코디가 즐겨찾기에 저장되었습니다!');
     } catch (e) {
