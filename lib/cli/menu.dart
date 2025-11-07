@@ -323,7 +323,7 @@ class Menu {
             await _favoritesService.renameFavorite(id, newName);
             Logger.success(
                 '"${favorite.name}"의 이름이 "$newName"으로 변경되었습니다!');
-            break;
+            return; // 목록으로 돌아가기
 
           case 2: // 삭제하기
             if (Prompt.confirm('"${favorite.name}" 코디를 삭제하시겠습니까?')) {
