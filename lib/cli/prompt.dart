@@ -118,6 +118,55 @@ class Prompt {
     return input;
   }
 
+  /// 이미지 파일 경로 입력 받기
+  /// 
+  /// [message]: 입력 프롬프트 메시지
+  /// 반환: File 객체, null (뒤로가기 또는 잘못된 입력)
+  static File? inputImagePath(String message) {
+    Logger.blankLine();
+    Logger.log('> $message (뒤로가려면 B 입력):');
+    stdout.write('파일 경로: ');
+    final input = stdin.readLineSync()?.trim() ?? '';
+
+    // 뒤로가기
+    if (input.toUpperCase() == 'B') {
+      return null;
+    }
+
+    // 빈 입력
+    if (input.isEmpty) {
+      Logger.error('파일 경로가 비어있습니다.');
+      return null;
+    }
+
+    // File 객체 생성
+    final file = File(input);
+
+    // 파일 존재 여부 확인
+    if (!file.existsSync()) {
+      Logger.error('파일이 존재하지 않습니다: $input');
+      return null;
+    }
+
+    // 이미지 확장자 검증 (선택사항)
+    final fileName = file.path.split(Platform.pathSeparator).last.toLowerCase();
+    final validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    final hasValidExtension = validExtensions.any(
+      (ext) => fileName.endsWith(ext),
+    );
+
+    if (!hasValidExtension) {
+      Logger.warning('이미지 파일 형식이 아닐 수 있습니다.');
+      Logger.log('지원 형식: ${validExtensions.join(', ')}');
+      final proceed = confirm('계속하시겠습니까?');
+      if (!proceed) {
+        return null;
+      }
+    }
+
+    return file;
+  }
+
   /// 확인 (Y/N)
   /// 
   /// [message]: 확인 메시지

@@ -131,14 +131,14 @@ class Menu {
     try {
       switch (choice) {
         case 1: // 삭제
-          if (Prompt.confirm('"${selectedItem.name}"를 삭제하시겠습니까?')) {
+          if (Prompt.confirm('아이템(id=${itemId})를 삭제하시겠습니까?')) {
             await _closetService.deleteItem(itemId);
-            Logger.success('"${selectedItem.name}"가 옷장에서 삭제되었습니다!');
+            Logger.success('아이템(id=${itemId})가 옷장에서 삭제되었습니다!');
           }
           break;
         case 2: // 코디에 추가
           await _outfitService.updateOutfitItem(category, itemId);
-          Logger.success('"${selectedItem.name}"가 오늘의 코디에 추가되었습니다!');
+          Logger.success('아이템(id=${itemId})가 오늘의 코디에 추가되었습니다!');
           break;
         case 3: // 뒤로가기
           return;
@@ -150,12 +150,12 @@ class Menu {
 
   /// 옷장 아이템 추가
   Future<void> _addClosetItem(String category) async {
-    final name = Prompt.inputText('새 아이템 이름을 입력하세요');
-    if (name == null) return; // 뒤로가기 또는 빈 입력
+    final imageFile = Prompt.inputImagePath('이미지 파일 경로를 입력하세요');
+    if (imageFile == null) return; // 뒤로가기 또는 잘못된 입력
 
     try {
-      await _closetService.addItem(category, name);
-      Logger.success('"$name"가 $category 옷장에 추가되었습니다!');
+      await _closetService.addItem(category, imageFile);
+      Logger.success('이미지가 $category 옷장에 추가되었습니다!');
     } catch (e) {
       _handleError(e);
     }
@@ -228,7 +228,7 @@ class Menu {
 
       // 코디에 아이템 설정
       await _outfitService.updateOutfitItem(category, itemId);
-      Logger.success('${category}가 "${selectedItem.name}"로 설정되었습니다!');
+      Logger.success('${category}가 아이템(id=${itemId})로 설정되었습니다!');
     } catch (e) {
       _handleError(e);
     }

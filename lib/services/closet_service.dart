@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../api/api_client.dart';
 import '../api/endpoints.dart';
 import '../models/closet_item.dart';
@@ -41,14 +42,13 @@ class ClosetService {
   /// 아이템 추가
   /// 
   /// [category]: 카테고리 (top, bottom, shoes, outer)
-  /// [name]: 아이템 이름
+  /// [imageFile]: 업로드할 이미지 파일
   /// 반환: 성공 메시지
   /// 예외: ApiException (에러 발생 시)
-  Future<String> addItem(String category, String name) async {
+  Future<String> addItem(String category, File imageFile) async {
     try {
       final url = Endpoints.closetByCategory(category);
-      final body = ClosetItem.createRequestJson(name);
-      final response = await _apiClient.post(url, body: body);
+      final response = await _apiClient.postMultipart(url, imageFile);
 
       // 성공 메시지 반환
       if (response is Map<String, dynamic> && response.containsKey('message')) {

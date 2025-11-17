@@ -19,7 +19,12 @@ class Views {
       Logger.log('(아이템이 없습니다)');
     } else {
       for (final item in items) {
-        Logger.log('- (id=${item.id}) ${item.name}');
+        final imageUrl = item.fullImageUrl;
+        if (imageUrl != null) {
+          Logger.log('- (id=${item.id}) $imageUrl');
+        } else {
+          Logger.log('- (id=${item.id}) (이미지 없음)');
+        }
       }
     }
   }
@@ -76,7 +81,12 @@ class Views {
       Logger.log('(아이템이 없습니다)');
     } else {
       for (final item in items) {
-        Logger.log('- (id=${item.id}) ${item.name}');
+        final imageUrl = item.fullImageUrl;
+        if (imageUrl != null) {
+          Logger.log('- (id=${item.id}) $imageUrl');
+        } else {
+          Logger.log('- (id=${item.id}) (이미지 없음)');
+        }
       }
       Logger.log('- (id=0) ❌ 비워놓기');
     }
@@ -129,8 +139,10 @@ class Views {
     Logger.separator();
   }
 
-  /// 아이템을 포맷팅 (있으면 이름, 없으면 "(없음)")
+  /// 아이템을 포맷팅 (있으면 ID와 이미지 URL, 없으면 "(없음)")
   static String _formatOutfitItem(ClosetItem? item) {
-    return item != null ? item.name : '(없음)';
+    if (item == null) return '(없음)';
+    final imageUrl = item.fullImageUrl;
+    return imageUrl != null ? 'id=${item.id} ($imageUrl)' : 'id=${item.id} (이미지 없음)';
   }
 }
