@@ -50,6 +50,12 @@ class Outfit {
     return top != null && bottom != null && shoes != null && outer != null;
   }
 
+  /// 즐겨찾기 저장을 위한 코디 완성 여부 확인 (outer 제외)
+  /// top, bottom, shoes만 선택되어 있으면 저장 가능
+  bool get isCompleteForFavorite {
+    return top != null && bottom != null && shoes != null;
+  }
+
   /// 특정 카테고리의 아이템 반환
   ClosetItem? getItemByCategory(String category) {
     switch (category) {

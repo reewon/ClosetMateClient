@@ -248,11 +248,12 @@ class Menu {
   /// 오늘의 코디 - 즐겨찾기로 저장
   Future<void> _saveFavorite() async {
     try {
-      // 코디 완성 여부 확인
+      // 코디 완성 여부 확인 (outer는 선택 사항)
       final outfit = await _outfitService.getTodayOutfit();
-      if (!outfit.isComplete) {
+      if (!outfit.isCompleteForFavorite) {
         Logger.warning('코디를 완성해주세요!');
-        Logger.log('(top, bottom, shoes, outer가 모두 선택되어야 합니다)');
+        Logger.log('(top, bottom, shoes가 모두 선택되어야 합니다)');
+        Logger.log('(outer는 선택 사항입니다)');
         return;
       }
 

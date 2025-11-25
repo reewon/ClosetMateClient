@@ -82,6 +82,7 @@ dart run bin/closet_cli.dart
 
 ```python
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from ..core.database import Base
 
 class User(Base):
@@ -90,12 +91,19 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     password = Column(String)  # 지금은 단순 문자열 (test_user만 존재)
+    gender = Column(String, default="남성")  # 성별 (남성, 여성) - Gemini API feature 추출 시 사용
+    
+    # 관계 정의
+    closet_items = relationship("ClosetItem", back_populates="user", cascade="all, delete-orphan")
+    today_outfit = relationship("TodayOutfit", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    favorite_outfits = relationship("FavoriteOutfit", back_populates="user", cascade="all, delete-orphan")
 ```
 
 ### 2. ClosetItem
 
 ```python
 from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 from ..core.database import Base
 
 class ClosetItem(Base):
@@ -103,15 +111,26 @@ class ClosetItem(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    category = Column(String)   # top, bottom, shoes, outer
-    feature = Column(String)    # Gemini API로 추출한 피쳐 정보 (예: '하의_gray_cotton_숏 팬츠_남성_여름_casual')
-    image_url = Column(String, nullable=True)
+    category = Column(String)  # top, bottom, shoes, outer
+    feature = Column(String, nullable=False)  # Gemini API로 추출한 피쳐 정보 (필수)
+    # 형식: '카테고리_색상_재질_상세정보_성별_계절_스타일'
+    # 예: '하의_gray_cotton_숏 팬츠_남성_여름_casual'
+    image_url = Column(String, nullable=True)  # 이미지 파일 경로 (예: "uploads/user_1/item_1_abc123.jpg")
+    
+    # 관계 정의
+    user = relationship("User", back_populates="closet_items")
 ```
+
+**주요 특징:**
+- `feature` 필드는 **필수 필드** (`nullable=False`)
+- Gemini API로 이미지에서 자동 추출됨
+- AI 추천 엔진에서 사용하는 핵심 데이터
 
 ### 3. TodayOutfit
 
 ```python
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..core.database import Base
 
@@ -122,14 +141,27 @@ class TodayOutfit(Base):
     top_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
     bottom_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
     shoes_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    outer_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    outer_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)  # 선택 사항
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 관계 정의
+    user = relationship("User", back_populates="today_outfit")
+    top = relationship("ClosetItem", foreign_keys=[top_id], post_update=True)
+    bottom = relationship("ClosetItem", foreign_keys=[bottom_id], post_update=True)
+    shoes = relationship("ClosetItem", foreign_keys=[shoes_id], post_update=True)
+    outer = relationship("ClosetItem", foreign_keys=[outer_id], post_update=True)
 ```
+
+**주요 특징:**
+- 사용자당 하나의 레코드만 존재 (user_id가 primary key)
+- `outer`는 선택 사항 (nullable=True)
+- 필수 카테고리: top, bottom, shoes
 
 ### 4. FavoriteOutfit
 
 ```python
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..core.database import Base
 
@@ -138,19 +170,47 @@ class FavoriteOutfit(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    name = Column(String)
+    name = Column(String)  # 즐겨찾기 이름 (예: "주말 데일리룩")
     top_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
     bottom_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
     shoes_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
-    outer_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)
+    outer_id = Column(Integer, ForeignKey("closet_items.id"), nullable=True)  # 선택 사항
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # 관계 정의
+    user = relationship("User", back_populates="favorite_outfits")
+    top = relationship("ClosetItem", foreign_keys=[top_id], post_update=True)
+    bottom = relationship("ClosetItem", foreign_keys=[bottom_id], post_update=True)
+    shoes = relationship("ClosetItem", foreign_keys=[shoes_id], post_update=True)
+    outer = relationship("ClosetItem", foreign_keys=[outer_id], post_update=True)
 ```
+
+**주요 특징:**
+- `outer`는 선택 사항 (nullable=True)
+- 저장 시 필수 카테고리: top, bottom, shoes (outer는 선택)
+- 같은 이름의 즐겨찾기는 중복 불가
 
 ### 테이블 관계
 
-- `users` → `closet_items`: 1:N (한 사용자가 여러 옷장 아이템 소유)
-- `closet_items` → `today_outfit`: 1:1 (각 아이템은 오늘의 코디에 포함될 수 있음)
-- `today_outfit` → `favorites`: 1:N (오늘의 코디를 여러 즐겨찾기로 저장 가능)
+- **`users` → `closet_items`**: 1:N
+  - 한 사용자가 여러 옷장 아이템 소유
+  - 사용자 삭제 시 관련 아이템도 함께 삭제 (cascade)
+  
+- **`users` → `today_outfit`**: 1:1
+  - 사용자당 하나의 오늘의 코디만 존재
+  - 사용자 삭제 시 함께 삭제 (cascade)
+  
+- **`users` → `favorite_outfits`**: 1:N
+  - 한 사용자가 여러 즐겨찾기 코디 저장 가능
+  - 사용자 삭제 시 관련 즐겨찾기도 함께 삭제 (cascade)
+  
+- **`closet_items` → `today_outfit`**: N:1
+  - 각 아이템은 오늘의 코디의 특정 카테고리에 포함될 수 있음
+  - top_id, bottom_id, shoes_id, outer_id로 참조
+  
+- **`closet_items` → `favorite_outfits`**: N:1
+  - 각 아이템은 여러 즐겨찾기 코디에 포함될 수 있음
+  - top_id, bottom_id, shoes_id, outer_id로 참조
 
 ## 📡 API 명세서
 
@@ -235,12 +295,26 @@ class FavoriteOutfit(Base):
 
 **요청 형식**
 - Content-Type: `multipart/form-data`
-- Body: `image` 필드에 이미지 파일 업로드
+- 필드: `image` (이미지 파일)
+- 지원 형식: jpg, jpeg, png, gif, webp
 
 **정상 응답 (200 OK)**
 ```json
 {
   "message": "추가 완료"
+}
+```
+
+**비정상 응답 (400 Bad Request) - 잘못된 카테고리**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "잘못된 카테고리입니다. 가능한 값: top, bottom, shoes, outer",
+  "detail": {
+    "category": "잘못된카테고리"
+  }
 }
 ```
 
@@ -252,20 +326,20 @@ class FavoriteOutfit(Base):
   "error": "Bad Request",
   "message": "이미지 파일만 업로드 가능합니다.",
   "detail": {
-    "file_type": "text/plain"
+    "content_type": "application/pdf"
   }
 }
 ```
 
-**비정상 응답 (400 Bad Request)**
+**비정상 응답 (400 Bad Request) - Gemini API 오류**
 ```json
 {
   "status": "error",
   "code": 400,
   "error": "Bad Request",
-  "message": "잘못된 카테고리입니다. 가능한 값: top, bottom, shoes, outer",
+  "message": "이미지 분석 중 오류가 발생했습니다: ...",
   "detail": {
-    "category": "잘못된카테고리"
+    "error": "..."
   }
 }
 ```
@@ -392,29 +466,35 @@ class FavoriteOutfit(Base):
 
 #### `POST /api/v1/outfit/recommend`
 
+**설명**
+- AI 추천 모델(Word2Vec 기반)을 사용하여 사용자의 옷장 아이템 중에서 코디를 추천합니다.
+- 현재 선택된 아이템이 있으면 해당 카테고리는 유지하고 나머지 카테고리만 추천합니다.
+- `outer`는 선택 사항이므로 추천 결과에 포함되지 않을 수 있습니다.
+- 최소한 `top`, `bottom`, `shoes` 카테고리에 각각 하나 이상의 아이템이 있어야 추천이 가능합니다.
+
 **정상 응답 - 완전한 추천 (200 OK)**
 ```json
 {
   "top": {
     "id": 5,
-    "image_url": "uploads/user_1/item_5_abc123.jpg"
+    "image_url": "uploads/user_1/item_5_mno345.jpg"
   },
   "bottom": {
     "id": 6,
-    "image_url": "uploads/user_1/item_6_def456.jpg"
+    "image_url": "uploads/user_1/item_6_pqr678.jpg"
   },
   "shoes": {
     "id": 7,
-    "image_url": "uploads/user_1/item_7_ghi789.jpg"
+    "image_url": "uploads/user_1/item_7_stu901.jpg"
   },
   "outer": {
     "id": 8,
-    "image_url": "uploads/user_1/item_8_jkl012.jpg"
+    "image_url": "uploads/user_1/item_8_vwx234.jpg"
   }
 }
 ```
 
-**정상 응답 - 부분 추천 (200 OK)**  
+**정상 응답 - 부분 추천 (200 OK)**
 *(이미 선택된 아이템이 있는 경우 해당 카테고리는 유지되고 나머지만 추천)*
 ```json
 {
@@ -424,11 +504,31 @@ class FavoriteOutfit(Base):
   },
   "bottom": {
     "id": 6,
-    "image_url": "uploads/user_1/item_6_def456.jpg"
+    "image_url": "uploads/user_1/item_6_pqr678.jpg"
   },
   "shoes": {
     "id": 7,
     "image_url": "uploads/user_1/item_7_ghi789.jpg"
+  },
+  "outer": null
+}
+```
+
+**정상 응답 - outer 없이 추천 (200 OK)**
+*(outer 카테고리에 아이템이 없거나 추천되지 않은 경우)*
+```json
+{
+  "top": {
+    "id": 5,
+    "image_url": "uploads/user_1/item_5_mno345.jpg"
+  },
+  "bottom": {
+    "id": 6,
+    "image_url": "uploads/user_1/item_6_pqr678.jpg"
+  },
+  "shoes": {
+    "id": 7,
+    "image_url": "uploads/user_1/item_7_stu901.jpg"
   },
   "outer": null
 }
@@ -444,6 +544,43 @@ class FavoriteOutfit(Base):
   "detail": {
     "resource": "closet_items",
     "user_id": 1
+  }
+}
+```
+
+**비정상 응답 (400 Bad Request) - AI 추천 모델을 사용할 수 없는 경우**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "AI 추천 모델을 사용할 수 없습니다. ai_recommendation 모듈이 설치되지 않았습니다.",
+  "detail": {}
+}
+```
+
+**비정상 응답 (400 Bad Request) - AI 추천 모델 로드 실패**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "AI 추천 모델을 로드할 수 없습니다.",
+  "detail": {
+    "error": "..."
+  }
+}
+```
+
+**비정상 응답 (400 Bad Request) - AI 추천 중 오류 발생**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "AI 추천 중 오류가 발생했습니다.",
+  "detail": {
+    "error": "..."
   }
 }
 ```
@@ -475,7 +612,7 @@ class FavoriteOutfit(Base):
 
 #### `GET /api/v1/favorites/{id}`
 
-**정상 응답 (200 OK)**
+**정상 응답 - outer 포함 (200 OK)**
 ```json
 {
   "name": "주말 데일리룩",
@@ -495,6 +632,27 @@ class FavoriteOutfit(Base):
     "id": 4,
     "image_url": "uploads/user_1/item_4_jkl012.jpg"
   }
+}
+```
+
+**정상 응답 - outer 없음 (200 OK)**
+*(outer는 선택 사항이므로 null일 수 있음)*
+```json
+{
+  "name": "여름 데일리룩",
+  "top": {
+    "id": 1,
+    "image_url": "uploads/user_1/item_1_abc123.jpg"
+  },
+  "bottom": {
+    "id": 2,
+    "image_url": "uploads/user_1/item_2_def456.jpg"
+  },
+  "shoes": {
+    "id": 3,
+    "image_url": "uploads/user_1/item_3_ghi789.jpg"
+  },
+  "outer": null
 }
 ```
 
@@ -527,7 +685,7 @@ class FavoriteOutfit(Base):
   "status": "error",
   "code": 400,
   "error": "Bad Request",
-  "message": "코디를 완성해주세요. (top, bottom, shoes, outer가 모두 선택되어야 합니다)",
+  "message": "코디를 완성해주세요. (top, bottom, shoes가 모두 선택되어야 합니다)",
   "detail": {
     "today_outfit": {
       "top_id": 1,
@@ -538,6 +696,8 @@ class FavoriteOutfit(Base):
   }
 }
 ```
+
+**참고**: `outer`는 선택 사항이므로 저장 시 필수로 선택할 필요가 없습니다. `top`, `bottom`, `shoes`만 선택되어 있으면 저장 가능합니다.
 
 **비정상 응답 (409 Conflict) - 중복 이름**
 ```json

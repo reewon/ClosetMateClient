@@ -70,7 +70,8 @@ class FavoritesService {
   /// 반환: 성공 메시지
   /// 예외: ApiException (에러 발생 시)
   /// 
-  /// 참고: 오늘의 코디가 완성되지 않은 경우 (4개의 카테고리 중 하나라도 미선택 시) 400 에러 발생
+  /// 참고: 오늘의 코디가 완성되지 않은 경우 (top, bottom, shoes 중 하나라도 미선택 시) 400 에러 발생
+  /// outer는 선택 사항이므로 필수로 선택할 필요가 없습니다.
   Future<String> saveFavorite(String name) async {
     try {
       final body = FavoriteOutfit.createSaveRequestJson(name);
