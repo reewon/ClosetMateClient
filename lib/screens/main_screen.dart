@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'closet_screen.dart';
+import 'today_outfit_screen.dart';
+import 'favorites_screen.dart';
 
 /// 메인 화면 - 하단 탭 네비게이션
 /// 
@@ -22,8 +24,8 @@ class _MainScreenState extends State<MainScreen> {
   // 각 탭에 해당하는 화면들
   final List<Widget> _screens = [
     const ClosetScreen(),
-    const _PlaceholderScreen(title: '오늘의 코디'),
-    const _PlaceholderScreen(title: '즐겨찾는 코디'),
+    const TodayOutfitScreen(),
+    const FavoritesScreen(),
     const _PlaceholderScreen(title: '마이페이지'),
   ];
 
@@ -64,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
             label: '오늘의 코디',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
+            icon: Icon(Icons.favorite_border),
             label: '즐겨찾는 코디',
           ),
           BottomNavigationBarItem(

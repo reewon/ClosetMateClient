@@ -7,8 +7,7 @@ import '../utils/logger.dart';
 import 'views.dart';
 import 'prompt.dart';
 
-/// CLI 메뉴 시스템
-/// 
+
 /// 메인 메뉴, 옷장, 오늘의 코디, 즐겨찾기 등 모든 메뉴를 관리합니다.
 class Menu {
   final ClosetService _closetService;

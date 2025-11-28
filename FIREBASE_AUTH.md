@@ -255,7 +255,7 @@
   - `isValidUsername()`
   - `isValidGender()` (남/여 검증)
 
-### 24단계: 토큰 관리 및 저장소
+### 24단계: 토큰 관리 및 저장소(제외)
 
 - **참고**: Firebase Auth는 토큰을 자동으로 관리하므로 별도 저장소가 필수는 아님
 - **선택 사항**: `lib/utils/token_storage.dart` 생성 (필요 시)
