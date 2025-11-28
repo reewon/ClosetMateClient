@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'closet_screen.dart';
 
 /// 메인 화면 - 하단 탭 네비게이션
 /// 
@@ -17,12 +19,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  // 각 탭에 해당하는 화면들 (임시 placeholder)
+  // 각 탭에 해당하는 화면들
   final List<Widget> _screens = [
-    _PlaceholderScreen(title: '옷장'),
-    _PlaceholderScreen(title: '오늘의 코디'),
-    _PlaceholderScreen(title: '즐겨찾는 코디'),
-    _PlaceholderScreen(title: '마이페이지'),
+    const ClosetScreen(),
+    const _PlaceholderScreen(title: '오늘의 코디'),
+    const _PlaceholderScreen(title: '즐겨찾는 코디'),
+    const _PlaceholderScreen(title: '마이페이지'),
   ];
 
   @override
@@ -39,13 +41,11 @@ class _MainScreenState extends State<MainScreen> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(
-          fontFamily: 'GmarketSans',
+        selectedLabelStyle: GoogleFonts.quicksand(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontFamily: 'GmarketSans',
+        unselectedLabelStyle: GoogleFonts.quicksand(
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -55,7 +55,12 @@ class _MainScreenState extends State<MainScreen> {
             label: '옷장',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.style),
+            icon: Icon(
+              IconData(
+                0xef7b, // Material Symbols apparel 아이콘 코드 포인트
+                fontFamily: 'MaterialSymbolsRounded',
+              ),
+            ),
             label: '오늘의 코디',
           ),
           BottomNavigationBarItem(

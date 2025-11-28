@@ -15,7 +15,7 @@ google-services.json
 GoogleService-Info.plist
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
-# firebase_options.dart는 커밋해도 됨 (민감 정보 없음)
+lib/firebase_options.dart
 
 # Android
 android/.gradle/
@@ -38,6 +38,9 @@ ios/Flutter/flutter_export_environment.sh
 *.iml
 *.ipr
 *.iws
+# IntelliJ/Android Studio 프로젝트 파일 (루트 레벨)
+closet_client.iml
+android/*.iml
 
 # OS
 .DS_Store
@@ -52,9 +55,16 @@ coverage/
 .env.local
 .env.*.local
 
+# Local configuration (개인 IP 주소 등)
+lib/utils/config_local.dart
+
 # Misc
 *.log
 *.swp
 *.bak
 *~
+
+# Flutter 관련 추가
+.dart_tool/package_config.json
+.flutter-plugins-dependencies
 

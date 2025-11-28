@@ -4,17 +4,29 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../utils/config.dart';
 import '../models/api_error.dart';
+import '../services/auth_service.dart';
 
 /// HTTP API 클라이언트
 /// 
 /// 모든 HTTP 요청을 처리하고, 에러 응답을 파싱합니다.
+/// Firebase ID 토큰을 사용합니다.
 class ApiClient {
-  /// Authorization 헤더 생성
-  Map<String, String> _getHeaders() {
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': Config.authToken,
-    };
+  final AuthService _authService;
+
+  ApiClient({AuthService? authService})
+      : _authService = authService ?? AuthService();
+
+  /// Authorization 헤더 생성 (Firebase ID 토큰 사용)
+  Future<Map<String, String>> _getHeaders() async {
+    try {
+      final token = await _authService.getIdToken();
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+    } catch (e) {
+      throw ApiException('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.');
+    }
   }
 
   /// GET 요청
@@ -23,16 +35,14 @@ class ApiClient {
   /// 반환: 파싱된 JSON 응답
   /// 예외: ApiException (에러 응답 시)
   Future<dynamic> get(String url) async {
-    try {
+    return await _requestWithRetry(() async {
+      final headers = await _getHeaders();
       final response = await http.get(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: headers,
       );
-
       return _handleResponse(response);
-    } catch (e) {
-      throw ApiException('네트워크 오류가 발생했습니다: $e');
-    }
+    });
   }
 
   /// POST 요청
@@ -42,17 +52,15 @@ class ApiClient {
   /// 반환: 파싱된 JSON 응답
   /// 예외: ApiException (에러 응답 시)
   Future<dynamic> post(String url, {Map<String, dynamic>? body}) async {
-    try {
+    return await _requestWithRetry(() async {
+      final headers = await _getHeaders();
       final response = await http.post(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: headers,
         body: body != null ? jsonEncode(body) : null,
       );
-
       return _handleResponse(response);
-    } catch (e) {
-      throw ApiException('네트워크 오류가 발생했습니다: $e');
-    }
+    });
   }
 
   /// POST 요청 (multipart/form-data)
@@ -64,12 +72,13 @@ class ApiClient {
   /// 반환: 파싱된 JSON 응답
   /// 예외: ApiException (에러 응답 시)
   Future<dynamic> postMultipart(String url, File imageFile) async {
-    try {
+    return await _requestWithRetry(() async {
       // MultipartRequest 생성
       var request = http.MultipartRequest('POST', Uri.parse(url));
       
       // Authorization 헤더 추가 (Content-Type은 자동 설정되므로 제외)
-      request.headers['Authorization'] = Config.authToken;
+      final token = await _authService.getIdToken();
+      request.headers['Authorization'] = 'Bearer $token';
       
       // 이미지 파일 추가
       // 파일 확장자에 따라 적절한 MediaType 설정
@@ -110,9 +119,7 @@ class ApiClient {
       final response = await http.Response.fromStream(streamedResponse);
 
       return _handleResponse(response);
-    } catch (e) {
-      throw ApiException('네트워크 오류가 발생했습니다: $e');
-    }
+    });
   }
 
   /// PUT 요청
@@ -122,17 +129,15 @@ class ApiClient {
   /// 반환: 파싱된 JSON 응답
   /// 예외: ApiException (에러 응답 시)
   Future<dynamic> put(String url, {Map<String, dynamic>? body}) async {
-    try {
+    return await _requestWithRetry(() async {
+      final headers = await _getHeaders();
       final response = await http.put(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: headers,
         body: body != null ? jsonEncode(body) : null,
       );
-
       return _handleResponse(response);
-    } catch (e) {
-      throw ApiException('네트워크 오류가 발생했습니다: $e');
-    }
+    });
   }
 
   /// DELETE 요청
@@ -141,14 +146,45 @@ class ApiClient {
   /// 반환: 파싱된 JSON 응답
   /// 예외: ApiException (에러 응답 시)
   Future<dynamic> delete(String url) async {
-    try {
+    return await _requestWithRetry(() async {
+      final headers = await _getHeaders();
       final response = await http.delete(
         Uri.parse(url),
-        headers: _getHeaders(),
+        headers: headers,
       );
-
       return _handleResponse(response);
+    });
+  }
+
+  /// 토큰 갱신 후 재시도가 포함된 요청 처리
+  /// 
+  /// [request]: 실행할 요청 함수
+  /// 반환: 요청 결과
+  /// 예외: ApiException
+  Future<dynamic> _requestWithRetry(Future<dynamic> Function() request) async {
+    try {
+      // 첫 번째 시도
+      return await request();
+    } on ApiException catch (e) {
+      // 401 에러인 경우 토큰 갱신 후 재시도
+      if (e.statusCode == 401) {
+        try {
+          // 토큰 강제 갱신 후 재시도
+          await _authService.getIdToken(forceRefresh: true);
+          return await request();
+        } catch (retryError) {
+          // 재시도 실패 시 재로그인 유도 메시지
+          throw ApiException(
+            '인증이 만료되었습니다. 다시 로그인해주세요.',
+            apiError: e.apiError,
+          );
+        }
+      }
+      rethrow;
     } catch (e) {
+      if (e is ApiException) {
+        rethrow;
+      }
       throw ApiException('네트워크 오류가 발생했습니다: $e');
     }
   }

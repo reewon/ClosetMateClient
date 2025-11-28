@@ -13,6 +13,8 @@ dependencies:
   http: ^1.6.0
   http_parser: ^4.0.2
   google_fonts: ^6.1.0
+  image_picker: ^1.2.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -30,4 +32,13 @@ flutter:
       fonts:
         - asset: assets/font/GmarketSansTTFMedium.ttf
           weight: 500
+    - family: MaterialSymbolsRounded
+      fonts:
+        - asset: assets/font/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf
+    - family: MaterialSymbolsOutlined
+      fonts:
+        - asset: assets/font/MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].ttf
+    - family: MaterialSymbolsSharp
+      fonts:
+        - asset: assets/font/MaterialSymbolsSharp[FILL,GRAD,opsz,wght].ttf
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../utils/validation.dart';
 import 'signup_screen.dart';
+import 'main_screen.dart';
 
 /// 로그인 화면
 class LoginScreen extends StatefulWidget {
@@ -320,13 +321,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // 로그인 성공
       if (mounted) {
-        // TODO: 홈 화면으로 이동
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const HomeScreen()),
-        // );
+        // 메인 화면으로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
         
-        // 임시: 성공 메시지 표시
+        // 성공 메시지 표시
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('로그인 성공!'),

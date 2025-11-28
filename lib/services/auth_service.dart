@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import '../api/endpoints.dart';
 import '../api/api_client.dart';
 import '../models/api_error.dart';
@@ -10,7 +12,6 @@ import '../models/api_error.dart';
 /// Firebase Auth와 서버 API를 연동하여 인증 기능을 제공합니다.
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ApiClient _apiClient = ApiClient();
 
   /// Firebase Auth 인스턴스
   FirebaseAuth get auth => _auth;
@@ -189,30 +190,71 @@ class AuthService {
     required String gender,
   }) async {
     try {
+      final url = Endpoints.authSync;
+      final requestBody = jsonEncode({
+        'username': username,
+        'gender': gender,
+      });
+      
+      // 디버깅: 요청 정보 로깅
+      debugPrint('서버 동기화 요청: $url');
+      debugPrint('요청 본문: $requestBody');
+      
       final response = await http.post(
-        Uri.parse(Endpoints.authSync),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
         },
-        body: jsonEncode({
-          'username': username,
-          'gender': gender,
-        }),
+        body: requestBody,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw ApiException('서버 연결 시간이 초과되었습니다. 서버가 실행 중인지 확인해주세요.');
+        },
       );
+
+      // 디버깅: 응답 정보 로깅
+      debugPrint('서버 응답 상태 코드: ${response.statusCode}');
+      debugPrint('서버 응답 본문: ${response.body}');
 
       // 응답 처리
       if (response.statusCode == 200) {
         return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
       } else {
         // 에러 응답 처리
-        final errorData = jsonDecode(utf8.decode(response.bodyBytes));
-        if (errorData is Map<String, dynamic> && errorData['status'] == 'error') {
-          final apiError = ApiError.fromJson(errorData);
-          throw ApiException(apiError.message, apiError: apiError);
+        String errorMessage = '서버 오류가 발생했습니다. (${response.statusCode})';
+        
+        try {
+          final errorData = jsonDecode(utf8.decode(response.bodyBytes));
+          if (errorData is Map<String, dynamic>) {
+            if (errorData['status'] == 'error') {
+              final apiError = ApiError.fromJson(errorData);
+              errorMessage = apiError.message;
+              throw ApiException(errorMessage, apiError: apiError);
+            } else if (errorData.containsKey('detail')) {
+              // FastAPI 스타일 에러 응답
+              final detail = errorData['detail'];
+              if (detail is String) {
+                errorMessage = detail;
+              } else if (detail is Map<String, dynamic> && detail.containsKey('msg')) {
+                errorMessage = detail['msg'].toString();
+              }
+            }
+          }
+        } catch (e) {
+          // JSON 파싱 실패 시 원본 응답 본문 사용
+          if (response.body.isNotEmpty) {
+            errorMessage = '서버 오류 (${response.statusCode}): ${response.body}';
+          }
         }
-        throw ApiException('서버 오류가 발생했습니다. (${response.statusCode})');
+        
+        throw ApiException(errorMessage);
       }
+    } on SocketException catch (e) {
+      throw ApiException('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요: ${e.message}');
+    } on HttpException catch (e) {
+      throw ApiException('HTTP 오류가 발생했습니다: ${e.message}');
     } on ApiException {
       rethrow;
     } catch (e) {
