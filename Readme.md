@@ -1,11 +1,16 @@
-# ClosetMate CLI
+# ClosetMate Client
 
-ClosetMate 서비스의 CLI 클라이언트 애플리케이션입니다.
+ClosetMate 서비스의 클라이언트 애플리케이션입니다. (Flutter GUI 앱 + CLI)
 
 ## 프로젝트 구조
 
 ```
 closet_client/
+├── android/                         # Android 플랫폼
+├── assets/                          # 이미지, 폰트 등
+│   ├── closet_mate_logo.png
+│   └── font/
+│       └── GmarketSansTTFMedium.ttf
 ├── bin/
 │   └── closet_cli.dart              # CLI 실행 진입점
 ├── lib/
@@ -16,23 +21,48 @@ closet_client/
 │   │   ├── user.dart
 │   │   ├── closet_item.dart
 │   │   ├── outfit.dart
-│   │   └── favorite.dart
+│   │   ├── favorite.dart
+│   │   └── api_error.dart
 │   ├── services/
+│   │   ├── auth_service.dart        # Firebase Auth 서비스
+│   │   ├── api_service.dart         # API 통신 (토큰 자동 첨부)
 │   │   ├── closet_service.dart      # 내 옷장 관련 로직
 │   │   ├── outfit_service.dart      # 오늘의 코디 로직
 │   │   └── favorites_service.dart   # 즐겨찾기 관련 로직
+│   ├── screens/                     # Flutter 화면들
+│   │   ├── login_screen.dart        # 로그인 화면
+│   │   ├── signup_screen.dart       # 회원가입 화면
+│   │   └── main_screen.dart         # 메인 화면 (하단 탭 바)
 │   ├── cli/
 │   │   ├── menu.dart                # CLI 인터페이스
 │   │   ├── prompt.dart              # 입력/출력 처리
 │   │   └── views.dart               # 콘솔용 출력 포맷
-│   └── utils/
-│       ├── config.dart              # API base URL 등
-│       └── logger.dart              # 콘솔 스타일 출력
+│   ├── utils/
+│   │   ├── config.dart              # API base URL 등
+│   │   ├── logger.dart              # 콘솔 스타일 출력
+│   │   └── validation.dart          # 입력 검증 유틸리티
+│   ├── firebase_options.dart        # Firebase 설정 (자동 생성)
+│   └── main.dart                    # Flutter 앱 진입점
 ├── pubspec.yaml
 └── README.md
 ```
 
 ## 설치 및 실행
+
+### Flutter 앱 실행
+
+```bash
+# 의존성 설치
+flutter pub get
+
+# Android 에뮬레이터에서 실행
+flutter run
+
+# 특정 디바이스에서 실행
+flutter run -d <device_id>
+```
+
+### CLI 실행
 
 ```bash
 # 의존성 설치
@@ -44,9 +74,15 @@ dart run bin/closet_cli.dart
 
 ## 🔐 인증 정책
 
+### Flutter 앱
+- **Firebase Authentication**을 통한 이메일/비밀번호 인증
+- 로그인 시 Firebase ID 토큰 자동 발급
+- API 요청 시 `Authorization: Bearer <Firebase ID Token>` 헤더 자동 첨부
+- 토큰 만료 시 자동 갱신 (401 에러 발생 시)
+
+### CLI (테스트용)
 - 모든 API는 `Authorization: test-token` 헤더가 필요합니다.
 - 본 토큰은 테스트용 고정 계정(`user_id=1`, `username="test_user"`)으로 인증됩니다.
-- JWT 로그인 기능은 추후 추가될 예정입니다.
 
 ## ❌ 에러 응답 포맷
 
@@ -89,9 +125,16 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    password = Column(String)  # 지금은 단순 문자열 (test_user만 존재)
-    gender = Column(String, default="남성")  # 성별 (남성, 여성) - Gemini API feature 추출 시 사용
+    
+    # Firebase 인증 관련 필드
+    firebase_uid = Column(String, unique=True, index=True, nullable=False)  # Firebase UID (고유 식별자)
+    email = Column(String, unique=True, index=True, nullable=False)  # 이메일 (로그인 ID 역할)
+    
+    # 사용자 정보
+    username = Column(String, nullable=False)  # 사용자명 (email이 고유 식별자)
+    gender = Column(String, nullable=False, default="남성")  # 성별 (남성, 여성) - Gemini API feature 추출 시 사용
+    
+    # password 필드는 Firebase에서 관리
     
     # 관계 정의
     closet_items = relationship("ClosetItem", back_populates="user", cascade="all, delete-orphan")
@@ -217,11 +260,13 @@ class FavoriteOutfit(Base):
 > **Base URL**: `/api/v1`  
 > 모든 엔드포인트는 `/api/v1` prefix를 사용합니다. (향후 AI 모델 업그레이드 시 v2로 확장 가능)
 
-### 1. Auth (테스트용 인증)
+### 1. Auth (인증)
 
 | Method | Endpoint | Description | Request | Response |
 |--------|----------|-------------|---------|----------|
-| `GET` | `/api/v1/auth/test-login` | 테스트 토큰 발급 | — | `{ "token": "test-token" }` |
+| `GET` | `/api/v1/auth/test-login` | 테스트 토큰 발급 (개발/테스트용) | — | `{ "token": "test-token" }` |
+| `GET` | `/api/v1/auth/me` | 현재 사용자 정보 조회 | `Authorization: Bearer <token>` | `{ "id": 1, "firebase_uid": "...", "email": "...", "username": "...", "gender": "남성" }` |
+| `POST` | `/api/v1/auth/sync` | 사용자 정보 동기화 (회원가입 후 username, gender 업데이트) | `{ "username": "...", "gender": "남성" }` | `{ "id": 1, "firebase_uid": "...", "email": "...", "username": "...", "gender": "남성" }` |
 
 ### 2. Closet (내 옷장)
 
@@ -238,7 +283,7 @@ class FavoriteOutfit(Base):
 | `GET` | `/api/v1/outfit/today` | 오늘의 코디 보기 | — | `{ "top": {"id": 1, "image_url": "uploads/user_1/item_1_abc123.jpg"}, "bottom": {"id": 2, "image_url": "uploads/user_1/item_2_def456.jpg"}, ... }` |
 | `PUT` | `/api/v1/outfit/today` | 코디 아이템 선택/변경 | `{ "category": "top", "item_id": 3 }` | `{ "message": "top 변경 완료" }` |
 | `PUT` | `/api/v1/outfit/clear` | 특정 카테고리 비우기 | `{ "category": "top" }` | `{ "message": "top 비우기 완료" }` |
-| `POST` | `/api/v1/outfit/recommend` | AI 추천 실행 | — | `{ "top": {"id": ..., "image_url": "..."}, "bottom": {"id": ..., "image_url": "..."}, ... }` |
+| `POST` | `/api/v1/outfit/recommend` | AI 추천 실행 (Word2Vec 기반) | — | `{ "top": {"id": ..., "image_url": "..."}, "bottom": {"id": ..., "image_url": "..."}, ... }` |
 
 ### 4. Favorites (즐겨찾는 코디)
 
@@ -250,17 +295,131 @@ class FavoriteOutfit(Base):
 | `PUT` | `/api/v1/favorites/{id}` | 코디 이름 변경 | `{ "new_name": "주말 카페룩" }` | `{ "message": "이름이 변경되었습니다." }` |
 | `DELETE` | `/api/v1/favorites/{id}` | 코디 삭제 | — | `{ "message": "삭제 완료" }` |
 
-
 ## 📋 상세 응답 구조
 
 ### 1. Auth API
 
 #### `GET /api/v1/auth/test-login`
 
+**설명**
+- 개발/테스트용 테스트 토큰 발급 엔드포인트입니다.
+- 프로덕션 환경에서는 사용하지 않는 것을 권장합니다.
+
 **정상 응답 (200 OK)**
 ```json
 {
   "token": "test-token"
+}
+```
+
+---
+
+#### `GET /api/v1/auth/me`
+
+**설명**
+- 현재 인증된 사용자의 정보를 조회합니다.
+- Firebase ID 토큰이 필요합니다 (`Authorization: Bearer <firebase_id_token>`).
+
+**정상 응답 (200 OK)**
+```json
+{
+  "id": 1,
+  "firebase_uid": "abc123def456",
+  "email": "user@example.com",
+  "username": "user_abc123",
+  "gender": "남성"
+}
+```
+
+**비정상 응답 (401 Unauthorized) - 토큰이 제공되지 않은 경우**
+```json
+{
+  "status": "error",
+  "code": 401,
+  "error": "Unauthorized",
+  "message": "인증 토큰이 제공되지 않았습니다.",
+  "detail": {
+    "header": "Authorization"
+  }
+}
+```
+
+**비정상 응답 (401 Unauthorized) - 유효하지 않은 토큰**
+```json
+{
+  "status": "error",
+  "code": 401,
+  "error": "Unauthorized",
+  "message": "유효하지 않은 인증 토큰입니다.",
+  "detail": {}
+}
+```
+
+---
+
+#### `POST /api/v1/auth/sync`
+
+**설명**
+- 회원가입 후 사용자 정보(username, gender)를 동기화하는 엔드포인트입니다.
+- Firebase 로그인 후 첫 API 호출 시 사용자가 자동 생성되지만, 기본값으로 설정됩니다.
+- 이 엔드포인트를 통해 사용자가 직접 username과 gender를 설정할 수 있습니다.
+- `gender`는 "남성" 또는 "여성"만 입력 가능합니다.
+
+**요청 본문**
+```json
+{
+  "username": "홍길동",
+  "gender": "남성"
+}
+```
+
+**정상 응답 (200 OK)**
+```json
+{
+  "id": 1,
+  "firebase_uid": "abc123def456",
+  "email": "user@example.com",
+  "username": "홍길동",
+  "gender": "남성"
+}
+```
+
+**비정상 응답 (400 Bad Request) - 잘못된 gender 값**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "성별은 '남성' 또는 '여성'만 입력 가능합니다.",
+  "detail": {
+    "gender": "기타"
+  }
+}
+```
+
+**비정상 응답 (400 Bad Request) - username이 공백인 경우**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "사용자명은 공백만으로 구성될 수 없습니다.",
+  "detail": {
+    "username": "   "
+  }
+}
+```
+
+**비정상 응답 (401 Unauthorized) - 인증 토큰이 없는 경우**
+```json
+{
+  "status": "error",
+  "code": 401,
+  "error": "Unauthorized",
+  "message": "인증 토큰이 제공되지 않았습니다.",
+  "detail": {
+    "header": "Authorization"
+  }
 }
 ```
 
@@ -280,7 +439,7 @@ class FavoriteOutfit(Base):
   },
   {
     "id": 2,
-    "feature": "하의_gray_cotton_숏 팬츠_남성_여름_casual",
+    "feature": "상의_black_cotton_후드 티셔츠_남성_가을_street",
     "image_url": "uploads/user_1/item_2_def456.jpg"
   }
 ]
@@ -508,7 +667,7 @@ class FavoriteOutfit(Base):
   },
   "shoes": {
     "id": 7,
-    "image_url": "uploads/user_1/item_7_ghi789.jpg"
+    "image_url": "uploads/user_1/item_7_stu901.jpg"
   },
   "outer": null
 }
@@ -777,7 +936,7 @@ class FavoriteOutfit(Base):
 
 모든 API에서 인증 토큰이 없거나 잘못된 경우:
 
-**비정상 응답 (401 Unauthorized)**
+**비정상 응답 (401 Unauthorized) - 유효하지 않은 토큰**
 ```json
 {
   "status": "error",
@@ -788,7 +947,7 @@ class FavoriteOutfit(Base):
 }
 ```
 
-**헤더 누락 시 (401 Unauthorized)**
+**비정상 응답 (401 Unauthorized) - 헤더 누락**
 ```json
 {
   "status": "error",
@@ -800,6 +959,12 @@ class FavoriteOutfit(Base):
   }
 }
 ```
+
+**참고**: 
+- Firebase ID 토큰은 `Authorization: Bearer <firebase_id_token>` 형식으로 전송해야 합니다.
+- 토큰이 만료되면 클라이언트에서 토큰을 갱신한 후 재시도해야 합니다.
+
+---
 
 ---
 

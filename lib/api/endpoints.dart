@@ -7,6 +7,8 @@ class Endpoints {
 
   // Auth
   static const String testLogin = '$baseUrl/auth/test-login';
+  static const String authMe = '$baseUrl/auth/me';
+  static const String authSync = '$baseUrl/auth/sync';
 
   // Closet
   static String closetByCategory(String category) => '$baseUrl/closet/$category';

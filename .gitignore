@@ -1,8 +1,36 @@
-# Dart
+# Dart & Flutter
 .dart_tool/
 .packages
 build/
 pubspec.lock
+*.g.dart
+*.freezed.dart
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+.fvm/
+
+# Firebase (민감한 설정 파일)
+google-services.json
+GoogleService-Info.plist
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+# firebase_options.dart는 커밋해도 됨 (민감 정보 없음)
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+android/*.jks
+android/*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
 
 # IDE
 .idea/
@@ -18,6 +46,11 @@ Thumbs.db
 # Test
 coverage/
 .test_coverage.dart
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # Misc
 *.log
