@@ -123,9 +123,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         )
                       : _buildFavoritesList(),
                 ),
-          // 편집 모드일 때 하단에 떠있는 삭제 버튼
-          if (_isEditMode && _selectedFavoriteIds.isNotEmpty)
-            _buildEditBottomBar(),
         ],
       ),
     );
@@ -163,12 +160,49 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   /// 즐겨찾기 목록
   Widget _buildFavoritesList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: _favorites.length,
-      itemBuilder: (context, index) {
-        final favorite = _favorites[index];
-        return _buildFavoriteCard(favorite);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 화면 크기에 맞춰 동적으로 비율 계산
+        final screenHeight = constraints.maxHeight;
+        final screenWidth = constraints.maxWidth;
+        final padding = 16.0;
+        final mainSpacing = 24.0; // 세로 간격
+        final crossSpacing = 20.0; // 가로 간격
+        final heightReduction = 30.0; // 카드 높이 줄이기 위한 여백 (하단 탭 바와의 거리 조정)
+
+        // 사용 가능한 너비와 높이 계산
+        final availableWidth = screenWidth - (padding * 2);
+        final availableHeight = screenHeight - (padding * 2) - heightReduction;
+
+        // 카드 너비 (2열이므로)
+        final cardWidth = (availableWidth - crossSpacing) / 2;
+        // 카드 높이 (2행이므로, 간격 고려)
+        final cardHeight = (availableHeight - mainSpacing) / 2;
+
+        // 비율 계산
+        final aspectRatio = cardWidth / cardHeight;
+
+        return Padding(
+          padding: const EdgeInsets.only(
+            top: 24.0, // 상단 여백
+            left: 16.0,
+            right: 16.0,
+            bottom: 16.0,
+          ),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // 2열
+              mainAxisSpacing: mainSpacing,
+              crossAxisSpacing: crossSpacing,
+              childAspectRatio: aspectRatio,
+            ),
+            itemCount: _favorites.length,
+            itemBuilder: (context, index) {
+              final favorite = _favorites[index];
+              return _buildFavoriteCard(favorite);
+            },
+          ),
+        );
       },
     );
   }
@@ -323,11 +357,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               : BorderSide.none,
         ),
         color: Colors.white,
-        margin: const EdgeInsets.only(bottom: 16.0),
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -339,7 +372,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         favorite.name,
                         style: const TextStyle(
                           fontFamily: 'GmarketSans',
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Colors.black,
                         ),
@@ -350,7 +383,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           icon: const Icon(
                             Icons.edit,
                             color: Colors.grey,
-                            size: 20,
+                            size: 18,
                           ),
                           onPressed: () => _showRenameDialog(favorite),
                           padding: EdgeInsets.zero,
@@ -358,13 +391,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
                   // 하단: 2x2 Grid 레이아웃 (아이템 이미지)
-                  _buildItemGrid(
-                    top: favorite.top,
-                    bottom: favorite.bottom,
-                    shoes: favorite.shoes,
-                    outer: favorite.outer,
+                  Expanded(
+                    child: _buildItemGrid(
+                      top: favorite.top,
+                      bottom: favorite.bottom,
+                      shoes: favorite.shoes,
+                      outer: favorite.outer,
+                    ),
                   ),
                 ],
               ),
@@ -417,8 +452,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
+        mainAxisSpacing: 6,
+        crossAxisSpacing: 6,
         childAspectRatio: 1.0,
       ),
       itemCount: 4,
@@ -467,57 +502,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           );
         }
       },
-    );
-  }
-
-  /// 편집 모드 하단 버튼
-  Widget _buildEditBottomBar() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 48, // 하단 탭 바 위
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton.icon(
-              onPressed: _deleteSelectedFavorites,
-              icon: const Icon(Icons.delete, size: 20),
-              label: const Text(
-                '삭제',
-                style: TextStyle(
-                  fontFamily: 'GmarketSans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

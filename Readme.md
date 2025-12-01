@@ -10,7 +10,10 @@ closet_client/
 ├── assets/                          # 이미지, 폰트 등
 │   ├── closet_mate_logo.png
 │   └── font/
-│       └── GmarketSansTTFMedium.ttf
+│       ├── GmarketSansTTFMedium.ttf
+│       ├── MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf
+│       ├── MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].ttf
+│       └── MaterialSymbolsSharp[FILL,GRAD,opsz,wght].ttf
 ├── bin/
 │   └── closet_cli.dart              # CLI 실행 진입점
 ├── lib/
@@ -18,11 +21,11 @@ closet_client/
 │   │   ├── api_client.dart          # HTTP 공통 처리 (GET, POST 등)
 │   │   └── endpoints.dart           # API URL 상수
 │   ├── models/
-│   │   ├── user.dart
-│   │   ├── closet_item.dart
-│   │   ├── outfit.dart
-│   │   ├── favorite.dart
-│   │   └── api_error.dart
+│   │   ├── user.dart                # 사용자 모델
+│   │   ├── closet_item.dart         # 옷장 아이템 모델
+│   │   ├── outfit.dart              # 코디 모델
+│   │   ├── favorite.dart            # 즐겨찾기 코디 모델
+│   │   └── api_error.dart           # API 에러 모델
 │   ├── services/
 │   │   ├── auth_service.dart        # Firebase Auth 서비스
 │   │   ├── api_service.dart         # API 통신 (토큰 자동 첨부)
@@ -32,13 +35,24 @@ closet_client/
 │   ├── screens/                     # Flutter 화면들
 │   │   ├── login_screen.dart        # 로그인 화면
 │   │   ├── signup_screen.dart       # 회원가입 화면
-│   │   └── main_screen.dart         # 메인 화면 (하단 탭 바)
+│   │   ├── main_screen.dart         # 메인 화면 (하단 탭 바)
+│   │   ├── closet_screen.dart       # 옷장 메인 화면
+│   │   ├── closet_items_screen.dart # 카테고리별 옷장 아이템 화면
+│   │   ├── today_outfit_screen.dart # 오늘의 코디 화면
+│   │   ├── favorites_screen.dart    # 즐겨찾는 코디 화면
+│   │   ├── my_page_screen.dart      # 마이페이지 화면
+│   │   └── edit_profile_screen.dart # 프로필 수정 화면
+│   ├── widgets/                     # 재사용 가능한 위젯들
+│   │   ├── item_selection_dialog.dart    # 아이템 선택 다이얼로그
+│   │   ├── favorite_name_dialog.dart     # 즐겨찾기 이름 입력/수정 다이얼로그
+│   │   └── favorite_detail_dialog.dart   # 즐겨찾기 상세 보기 다이얼로그
 │   ├── cli/
 │   │   ├── menu.dart                # CLI 인터페이스
 │   │   ├── prompt.dart              # 입력/출력 처리
 │   │   └── views.dart               # 콘솔용 출력 포맷
 │   ├── utils/
 │   │   ├── config.dart              # API base URL 등
+│   │   ├── config_local.dart        # 로컬 개발 환경 설정
 │   │   ├── logger.dart              # 콘솔 스타일 출력
 │   │   └── validation.dart          # 입력 검증 유틸리티
 │   ├── firebase_options.dart        # Firebase 설정 (자동 생성)
@@ -46,6 +60,10 @@ closet_client/
 ├── pubspec.yaml
 └── README.md
 ```
+
+### 폰트 사용
+- **로컬 폰트**: GmarketSans, Material Symbols (Rounded/Outlined/Sharp)
+- **Google Fonts** (google_fonts 패키지): Quicksand, Aboreto
 
 ## 설치 및 실행
 
@@ -267,6 +285,7 @@ class FavoriteOutfit(Base):
 | `GET` | `/api/v1/auth/test-login` | 테스트 토큰 발급 (개발/테스트용) | — | `{ "token": "test-token" }` |
 | `GET` | `/api/v1/auth/me` | 현재 사용자 정보 조회 | `Authorization: Bearer <token>` | `{ "id": 1, "firebase_uid": "...", "email": "...", "username": "...", "gender": "남성" }` |
 | `POST` | `/api/v1/auth/sync` | 사용자 정보 동기화 (회원가입 후 username, gender 업데이트) | `{ "username": "...", "gender": "남성" }` | `{ "id": 1, "firebase_uid": "...", "email": "...", "username": "...", "gender": "남성" }` |
+| `PUT` | `/api/v1/auth/sync` | 사용자 프로필 수정 (username, gender 업데이트) | `{ "username": "...", "gender": "남성" }` | `{ "id": 1, "firebase_uid": "...", "email": "...", "username": "...", "gender": "남성" }` |
 
 ### 2. Closet (내 옷장)
 
@@ -363,6 +382,74 @@ class FavoriteOutfit(Base):
 - 회원가입 후 사용자 정보(username, gender)를 동기화하는 엔드포인트입니다.
 - Firebase 로그인 후 첫 API 호출 시 사용자가 자동 생성되지만, 기본값으로 설정됩니다.
 - 이 엔드포인트를 통해 사용자가 직접 username과 gender를 설정할 수 있습니다.
+- `gender`는 "남성" 또는 "여성"만 입력 가능합니다.
+
+**요청 본문**
+```json
+{
+  "username": "홍길동",
+  "gender": "남성"
+}
+```
+
+**정상 응답 (200 OK)**
+```json
+{
+  "id": 1,
+  "firebase_uid": "abc123def456",
+  "email": "user@example.com",
+  "username": "홍길동",
+  "gender": "남성"
+}
+```
+
+**비정상 응답 (400 Bad Request) - 잘못된 gender 값**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "성별은 '남성' 또는 '여성'만 입력 가능합니다.",
+  "detail": {
+    "gender": "기타"
+  }
+}
+```
+
+**비정상 응답 (400 Bad Request) - username이 공백인 경우**
+```json
+{
+  "status": "error",
+  "code": 400,
+  "error": "Bad Request",
+  "message": "사용자명은 공백만으로 구성될 수 없습니다.",
+  "detail": {
+    "username": "   "
+  }
+}
+```
+
+**비정상 응답 (401 Unauthorized) - 인증 토큰이 없는 경우**
+```json
+{
+  "status": "error",
+  "code": 401,
+  "error": "Unauthorized",
+  "message": "인증 토큰이 제공되지 않았습니다.",
+  "detail": {
+    "header": "Authorization"
+  }
+}
+```
+
+---
+
+#### `PUT /api/v1/auth/sync`
+
+**설명**
+- 사용자 프로필 수정을 위한 엔드포인트입니다.
+- 프로필 수정 화면에서 username과 gender를 업데이트할 수 있습니다.
+- `POST /api/v1/auth/sync`와 동일한 로직을 사용하지만, 프로필 수정 용도로 사용됩니다.
 - `gender`는 "남성" 또는 "여성"만 입력 가능합니다.
 
 **요청 본문**

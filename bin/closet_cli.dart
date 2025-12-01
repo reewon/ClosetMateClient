@@ -1,7 +1,6 @@
 import '../lib/cli/menu.dart';
 import '../lib/cli/prompt.dart';
 import '../lib/utils/logger.dart';
-import '../lib/utils/config.dart';
 
 /// ClosetMate CLI 진입점
 /// 
@@ -38,8 +37,8 @@ void _login() {
   // 아이디 입력 (환영 메시지용)
   final username = Prompt.input('아이디');
   
-  // 비밀번호 입력 (실제로는 사용 안 함)
-  final password = Prompt.input('비밀번호');
+  // 비밀번호 입력 (테스트용 - 실제로는 test-token 사용)
+  Prompt.input('비밀번호');
   
   // 환영 메시지
   Logger.success('${username}님 환영합니다!');

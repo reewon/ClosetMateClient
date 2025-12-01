@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'config_local.dart' as local;
 
 /// API 설정 및 상수 정의
@@ -37,19 +36,19 @@ class Config {
   /// 실제 디바이스 테스트 시 아래 주석을 해제하고 에뮬레이터용 라인을 주석 처리하세요
   static String get baseUrl {
     // 에뮬레이터용
-    return 'http://10.0.2.2:8000/api/v1';
+    // return 'http://10.0.2.2:8000/api/v1';
     
     // 실제 디바이스용 (USB 디버깅으로 APK 설치 시 주석 해제)
-    // return 'http://$_devServerIp:8000/api/v1';
+    return 'http://$_devServerIp:8000/api/v1';
   }
 
   /// 서버 Base URL (이미지 URL 변환용)
   static String get serverBaseUrl {
     // 에뮬레이터용
-    return 'http://10.0.2.2:8000';
+    // return 'http://10.0.2.2:8000';
     
     // 실제 디바이스용
-    // return 'http://$_devServerIp:8000';
+    return 'http://$_devServerIp:8000';
   }
 
   /// 인증 토큰 (현재는 테스트 토큰 사용)

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/favorite.dart';
 import '../models/closet_item.dart';
-import '../utils/config.dart';
 
 /// 즐겨찾는 코디 상세 정보 Dialog
 ///

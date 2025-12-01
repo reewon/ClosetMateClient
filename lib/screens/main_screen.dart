@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'closet_screen.dart';
 import 'today_outfit_screen.dart';
 import 'favorites_screen.dart';
+import 'my_page_screen.dart';
 
 /// 메인 화면 - 하단 탭 네비게이션
 /// 
@@ -26,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
     const ClosetScreen(),
     const TodayOutfitScreen(),
     const FavoritesScreen(),
-    const _PlaceholderScreen(title: '마이페이지'),
+    const MyPageScreen(),
   ];
 
   @override
@@ -57,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
             label: '옷장',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
+            icon: const Icon(
               IconData(
                 0xef7b, // Material Symbols apparel 아이콘 코드 포인트
                 fontFamily: 'MaterialSymbolsRounded',
@@ -70,48 +71,10 @@ class _MainScreenState extends State<MainScreen> {
             label: '즐겨찾는 코디',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline),
             label: '마이페이지',
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 임시 Placeholder 화면
-/// 
-/// 실제 화면이 구현되기 전까지 사용되는 임시 화면입니다.
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontFamily: 'GmarketSans',
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Text(
-          '$title 화면',
-          style: const TextStyle(
-            fontFamily: 'GmarketSans',
-            fontSize: 24,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-          ),
-        ),
       ),
     );
   }

@@ -77,7 +77,7 @@ class _TodayOutfitScreenState extends State<TodayOutfitScreen> {
               onPressed: _isLoading
                   ? null
                   : () => _handleAiRecommend(),
-              icon: Icon(
+              icon: const Icon(
                 IconData(
                   0xf06c, // Material Symbols smart_toy 아이콘 코드 포인트
                   fontFamily: 'MaterialSymbolsRounded',
@@ -236,7 +236,7 @@ class _TodayOutfitScreenState extends State<TodayOutfitScreen> {
       setState(() => _isLoading = true);
 
       // AI 추천 실행
-      final recommendedOutfit = await _outfitService.recommendOutfit();
+      await _outfitService.recommendOutfit();
 
       // 화면 새로고침
       await _loadOutfit();

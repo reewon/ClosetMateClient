@@ -122,18 +122,18 @@ class _ClosetScreenState extends State<ClosetScreen> {
                       right: 16.0,
                       bottom: 16.0,
                     ),
-                    child: GridView.count(
-                      crossAxisCount: 2, // 2열
+                child: GridView.count(
+                  crossAxisCount: 2, // 2열
                       mainAxisSpacing: mainSpacing,
                       crossAxisSpacing: crossSpacing,
                       childAspectRatio: aspectRatio,
-                      children: [
-                        _buildCategoryCard('상의', 'top'),
-                        _buildCategoryCard('하의', 'bottom'),
-                        _buildCategoryCard('신발', 'shoes'),
-                        _buildCategoryCard('아우터', 'outer'),
-                      ],
-                    ),
+                  children: [
+                    _buildCategoryCard('상의', 'top'),
+                    _buildCategoryCard('하의', 'bottom'),
+                    _buildCategoryCard('신발', 'shoes'),
+                    _buildCategoryCard('아우터', 'outer'),
+                  ],
+                ),
                   );
                 },
               ),
