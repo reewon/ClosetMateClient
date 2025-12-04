@@ -163,4 +163,3 @@ class FavoriteDetailDialog extends StatelessWidget {
     );
   }
 }
-

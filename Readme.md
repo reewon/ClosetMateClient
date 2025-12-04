@@ -57,8 +57,16 @@ closet_client/
 │   │   └── validation.dart          # 입력 검증 유틸리티
 │   ├── firebase_options.dart        # Firebase 설정 (자동 생성)
 │   └── main.dart                    # Flutter 앱 진입점
-├── pubspec.yaml
-└── README.md
+├── test/                            # 테스트 파일들
+│   ├── api/
+│   │   └── api_client_test.dart
+│   └── widget_test.dart
+├── analysis_options.yaml            # Dart 분석 옵션
+├── pubspec.yaml                     # 프로젝트 의존성 및 설정
+├── pubspec.lock                     # 의존성 잠금 파일
+├── Readme.md                        # 프로젝트 문서
+├── PROGRESS.md                      # 개발 진행 상황 문서
+└── FIREBASE_AUTH.md                 # Firebase 인증 관련 문서
 ```
 
 ### 폰트 사용

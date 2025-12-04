@@ -239,4 +239,3 @@ class _FavoriteNameDialogState extends State<FavoriteNameDialog> {
     );
   }
 }
-

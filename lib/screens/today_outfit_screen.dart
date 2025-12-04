@@ -430,4 +430,3 @@ class _TodayOutfitScreenState extends State<TodayOutfitScreen> {
     );
   }
 }
-

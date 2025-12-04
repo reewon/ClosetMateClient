@@ -103,4 +103,3 @@ ApiError? _parseErrorResponse(Map<String, dynamic> jsonResponse) {
 
   return null;
 }
-

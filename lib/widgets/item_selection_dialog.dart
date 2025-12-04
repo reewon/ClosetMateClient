@@ -267,4 +267,3 @@ class _ItemSelectionDialogState extends State<ItemSelectionDialog> {
     );
   }
 }
-

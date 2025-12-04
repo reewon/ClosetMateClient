@@ -50,4 +50,3 @@ class Logger {
     print('\n===== $title =====');
   }
 }
-

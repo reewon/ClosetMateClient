@@ -430,4 +430,3 @@ class _ClosetItemsScreenState extends State<ClosetItemsScreen> {
     );
   }
 }
-

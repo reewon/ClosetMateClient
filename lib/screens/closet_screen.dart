@@ -332,4 +332,3 @@ class _ClosetScreenState extends State<ClosetScreen> {
     );
   }
 }
-

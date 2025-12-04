@@ -43,4 +43,3 @@ class ApiError {
     return message;
   }
 }
-
