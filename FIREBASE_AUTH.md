@@ -266,7 +266,7 @@
 
 ### 25단계: API 클라이언트 생성
 
-- `lib/services/api_service.dart` 생성
+- `lib/api/api_client.dart` 생성
 - **기능 구현**:
   - `AuthService`에서 토큰 가져오기
   - `Authorization: Bearer <token>` 헤더 자동 추가
@@ -278,6 +278,8 @@
     - 401 응답 시 재로그인 유도
     - 네트워크 오류 처리
     - 타임아웃 처리
+  - **Multipart 파일 업로드 지원**:
+    - 이미지 파일 업로드를 위한 `postMultipart()` 메서드 제공
 
 ### 26단계: 회원가입 화면 구현
 

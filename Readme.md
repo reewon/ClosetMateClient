@@ -28,7 +28,6 @@ closet_client/
 │   │   └── api_error.dart           # API 에러 모델
 │   ├── services/
 │   │   ├── auth_service.dart        # Firebase Auth 서비스
-│   │   ├── api_service.dart         # API 통신 (토큰 자동 첨부)
 │   │   ├── closet_service.dart      # 내 옷장 관련 로직
 │   │   ├── outfit_service.dart      # 오늘의 코디 로직
 │   │   └── favorites_service.dart   # 즐겨찾기 관련 로직

@@ -10,9 +10,10 @@
   - 로그인
   - 로그아웃
   - ID 토큰 관리
-- [x] ApiService 구현 (`lib/services/api_service.dart`)
+- [x] ApiClient 구현 (`lib/api/api_client.dart`)
   - 자동 토큰 첨부
   - 토큰 갱신 (401 에러 시)
+  - Multipart 파일 업로드 지원
 - [x] Validation 유틸리티 (`lib/utils/validation.dart`)
   - 이메일, 비밀번호, 사용자명, 성별 검증
 - [x] 로그인 화면 (`lib/screens/login_screen.dart`)
