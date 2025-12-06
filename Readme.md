@@ -69,7 +69,7 @@ closet_client/
 ```
 
 ### 폰트 사용
-- **로컬 폰트**: GmarketSans, Material Symbols (Rounded/Outlined/Sharp)
+- **로컬 폰트**: GmarketSans, Material Symbols (Rounded)
 - **Google Fonts** (google_fonts 패키지): Quicksand, Aboreto
 
 ## 설치 및 실행

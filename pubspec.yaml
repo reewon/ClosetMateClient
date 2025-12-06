@@ -35,10 +35,4 @@ flutter:
     - family: MaterialSymbolsRounded
       fonts:
         - asset: assets/font/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf
-    - family: MaterialSymbolsOutlined
-      fonts:
-        - asset: assets/font/MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].ttf
-    - family: MaterialSymbolsSharp
-      fonts:
-        - asset: assets/font/MaterialSymbolsSharp[FILL,GRAD,opsz,wght].ttf
 
